@@ -39,8 +39,27 @@ const FindClinics = function(callback) {
 
 // Routes
 app.get("/", function(req,res) {
-	// res.send("Hello World!");
 	res.render('home');
+
+});
+
+
+app.get("/clinics/all", function(req,res){
+	FindClinics(function(clinics){
+	var names = [];
+	clinics.forEach(function(clinic) {
+		names.push(clinic.name);
+	})
+
+	if (clinics !== null) {
+		res.json({names:names});
+
+	}
+	else {
+		res.send("There was a problem at the backend");	
+	}
+	
+});
 
 });
 
@@ -52,9 +71,7 @@ app.get("/clinics", function(req,res){
 		})
 
 		if (clinics !== null) {
-			// res.send('We have ' + names.length + ' clinics in our database');
 			res.render('clinics', {names:names});
-
 		}
 		else {
 			res.send("There was a problem at the backend");	
