@@ -3,8 +3,9 @@ var app = express();
 var mongoose = require("mongoose");
 const PORT = 3000;
 
-// Setup DB
+app.set('view engine', 'ejs');
 
+// Setup DB
 mongoose.connect('mongodb://localhost/clinics');
 var Schema = mongoose.Schema, objectId = Schema.ObjectId;
 
@@ -15,11 +16,10 @@ var clinicSchema = new Schema({
 
 });
 
+// Clinic model
 var ClinicModel = mongoose.model("clinic", clinicSchema)
 
-
 // DB Helpers
-
 const FindClinics = function(callback) {
 
 	ClinicModel.find({}).exec((function(err, docs) {
@@ -37,10 +37,10 @@ const FindClinics = function(callback) {
 
 }
 
-
-
+// Routes
 app.get("/", function(req,res) {
-	res.send("Hello World!");
+	// res.send("Hello World!");
+	res.render('home');
 
 });
 
@@ -52,7 +52,9 @@ app.get("/clinics", function(req,res){
 		})
 
 		if (clinics !== null) {
-			res.send('We have ' + names.length + ' clinics in our database');
+			// res.send('We have ' + names.length + ' clinics in our database');
+			res.render('clinics', {names:names});
+
 		}
 		else {
 			res.send("There was a problem at the backend");	
@@ -67,6 +69,7 @@ app.get("*", function(req,res) {
 
 });
 
+// Start server
 app.listen(PORT, function() {
 	console.log("Port started on " + PORT);
 })

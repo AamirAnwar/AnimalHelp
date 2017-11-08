@@ -1,0 +1,8 @@
+<% include header.ejs %>
+<h1>Welcome to the clinics page! We have <%= names.length%> clinics!</h1>
+<ul>
+<% for(var i=0; i<names.length;i++) { %>
+	<li><strong><%=names[i]%></strong></li>
+<% } %>
+</ul> 
+<% include footer.ejs %>
