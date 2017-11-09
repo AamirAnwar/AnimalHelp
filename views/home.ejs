@@ -9,7 +9,7 @@
     <div id="result">
         <!--Position information will be inserted here-->
         <% if (distance) { %>
-        <p>The nearest clinic is <%= clinic.name%> at distance of <%= distance%> km</p>
+        <p>The nearest clinic is <%= clinic.name%> at distance of <%= new Intl.NumberFormat('en-IN', {maximumFractionDigits:2}).format(distance)%> km</p>
     <% } %>
 
     </div>
@@ -48,10 +48,7 @@
     }
 	</script>
 
-
-
-
-	<footer><% include footer.ejs %></footer>
+    <footer><% include footer.ejs %></footer>
 </body>
 </html>
 
