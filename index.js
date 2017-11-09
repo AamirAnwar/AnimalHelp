@@ -3,7 +3,11 @@ var app = express();
 var mongoose = require("mongoose");
 const PORT = 3000;
 
+// Set template engine as ejs (doing this lets us omit the .ejs extension)
 app.set('view engine', 'ejs');
+
+// Settings the static content root directory (think css)
+app.use(express.static('public'));
 
 // Setup DB
 mongoose.connect('mongodb://localhost/clinics');

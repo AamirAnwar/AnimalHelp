@@ -1,8 +1,18 @@
-<% include header.ejs %>
-<h1>Welcome to the clinics page! We have <%= names.length%> clinics!</h1>
-<ul>
-<% for(var i=0; i<names.length;i++) { %>
-	<li><strong><%=names[i]%></strong></li>
-<% } %>
-</ul> 
-<% include footer.ejs %>
+<!DOCTYPE html>
+<html>
+<head>
+	<% include head.ejs %>
+	<link rel="stylesheet" type="text/css" href="/style.css">
+</head>
+<body class='container'>
+	<header><% include header.ejs %></header>
+	<h1 class="card-title">Welcome to the clinics page!</h1>
+	<p class="card-text">We have <%= names.length%> clinics!</p>
+	<ul class="list-group">
+	<% for(var i=0; i<names.length;i++) { %>
+		<li class="list-group-item"><%=names[i]%></li>
+	<% } %>
+	</ul> 
+	<footer><% include footer.ejs %></footer>
+</body>
+</html>
