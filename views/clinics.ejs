@@ -7,10 +7,10 @@
 <body class='container'>
 	<header><% include header.ejs %></header>
 	<h1 class="card-title">Welcome to the clinics page!</h1>
-	<p class="card-text">We have <%= names.length%> clinics!</p>
+	<p class="card-text">We have <%= clinics.length%> clinics in <%= clinics[0].city[0].toUpperCase() + clinics[0].city.slice(1)%>!</p>
 	<ul class="list-group">
-	<% for(var i=0; i<names.length;i++) { %>
-		<li class="list-group-item"><%=names[i]%></li>
+	<% for(var i=0; i<clinics.length;i++) { %>
+		<li class="list-group-item"> <%=clinics[i].name + ' ' + clinics[i].address%></li>
 	<% } %>
 	</ul> 
 	<footer><% include footer.ejs %></footer>

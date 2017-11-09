@@ -5,7 +5,52 @@
 </head>
 <body class='container'>
 	<header><% include header.ejs %></header>
-	<h1>Welcome to the home page!</h1>	
+	<h1>Welcome!</h1>	
+    <div id="result">
+        <!--Position information will be inserted here-->
+        <% if (distance) { %>
+        <p>The nearest clinic is <%= clinic.name%> at distance of <%= distance%> km</p>
+    <% } %>
+
+    </div>
+    <button  type="button" class="btn btn-success" id="main_button" onclick="showPosition();">Detect Location</button>
+    <script type="text/javascript">
+
+    var lat,lon;
+    // var request = require('request');
+
+    function showPosition(){
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position){
+                var positionInfo = "Your current position is (" + "Latitude: " + position.coords.latitude + ", " + "Longitude: " + position.coords.longitude + ")";
+
+                lat = position.coords.latitude;
+                lon = position.coords.longitude;
+
+                document.getElementById("result").innerHTML = '<p>' + positionInfo + '</p>';
+
+                var button = document.getElementById("main_button");
+                button.textContent = 'Find nearest animal clinic';
+                button.onclick = getNearestClinic;
+
+
+            });
+        } else {
+            console.log("Sorry, your browser does not support HTML5 geolocation.");
+        }
+    }
+
+
+    function getNearestClinic() {
+        if (lat && lon) {
+            window.location.href = '/?lat='+lat+'&lon='+lon;
+        }
+    }
+	</script>
+
+
+
+
 	<footer><% include footer.ejs %></footer>
 </body>
 </html>
