@@ -3,55 +3,31 @@
 <head>
 	<% include head.ejs %>
 </head>
-<body class='container'>
-	<header><% include header.ejs %></header>
-	<h1>Welcome!</h1>	
-    <div id="result">
-        <!--Position information will be inserted here-->
-        <% if (distance) { %>
-        <p>The nearest clinic is <%= clinic.name%> at distance of <%= distance%> km</p>
-    <% } %>
+<body class="container">
+    <header><% include header.ejs %></header>
+    <div class='container'>
+    	<h1 id="home_page_header">Welcome!</h1>	
+        <div id="result">
+            <!--Position information will be inserted here-->
+            
+            <% if (distance !== undefined) { %>
+            <p>The nearest clinic is <%= clinic.name%> at distance of <%= new Intl.NumberFormat('en-IN', {maximumFractionDigits:2}).format(distance)%> km </p>
+        <% } else { %>
+            <p>Find the nearest animal clinic around you</p>
+        <% } %>
+        </p>
+        </div>
+        <% if (distance === undefined) { %>
+        <div id="main_button_div"> 
+            <button type="button" class="btn btn-success" id="main_button" onclick="showPosition();">Find clinic</button>
+        </div>
 
+        <%}%>
+        <div id='loading_animation'></div>
     </div>
-    <button  type="button" class="btn btn-success" id="main_button" onclick="showPosition();">Detect Location</button>
-    <script type="text/javascript">
 
-    var lat,lon;
-    // var request = require('request');
-
-    function showPosition(){
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position){
-                var positionInfo = "Your current position is (" + "Latitude: " + position.coords.latitude + ", " + "Longitude: " + position.coords.longitude + ")";
-
-                lat = position.coords.latitude;
-                lon = position.coords.longitude;
-
-                document.getElementById("result").innerHTML = '<p>' + positionInfo + '</p>';
-
-                var button = document.getElementById("main_button");
-                button.textContent = 'Find nearest animal clinic';
-                button.onclick = getNearestClinic;
-
-
-            });
-        } else {
-            console.log("Sorry, your browser does not support HTML5 geolocation.");
-        }
-    }
-
-
-    function getNearestClinic() {
-        if (lat && lon) {
-            window.location.href = '/?lat='+lat+'&lon='+lon;
-        }
-    }
-	</script>
-
-
-
-
-	<footer><% include footer.ejs %></footer>
+    <script type="text/javascript" src="/scripts/home.js"></script>
+    <footer><% include footer.ejs %></footer>
 </body>
 </html>
 
