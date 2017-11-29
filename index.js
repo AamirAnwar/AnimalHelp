@@ -1,3 +1,4 @@
+require('dotenv').config()
 var express = require("express");
 var app = express();
 var mongoose = require("mongoose");
@@ -14,7 +15,10 @@ app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Setup DB
-mongoose.connect('mongodb://localhost/clinics');
+// mongoose.connect('mongodb://localhost/clinics');
+const mongoConnectURL = 'mongodb://'+ process.env.DB_USER + ':' + process.env.DB_PASS +'@ds123926.mlab.com:23926/animal_help';
+mongoose.connect(mongoConnectURL)
+
 var Schema = mongoose.Schema, objectId = Schema.ObjectId;
 
 var clinicSchema = new Schema({
