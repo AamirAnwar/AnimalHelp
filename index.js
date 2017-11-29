@@ -2,7 +2,7 @@ var express = require("express");
 var app = express();
 var mongoose = require("mongoose");
 var bodyParser = require('body-parser');
-const PORT = 3000;
+const PORT = process.env.PORT|| 3000;
 
 // Set template engine as ejs (doing this lets us omit the .ejs extension)
 app.set('view engine', 'ejs');
@@ -68,20 +68,20 @@ app.get("/", function(req,res) {
 
 app.get("/clinics/all", function(req,res){
 	FindClinics(function(clinics){
-	var names = [];
-	clinics.forEach(function(clinic) {
-		names.push(clinic.name);
-	})
+		var names = [];
+		clinics.forEach(function(clinic) {
+			names.push(clinic.name);
+		})
 
-	if (clinics !== null) {
-		res.json({names:names});
+		if (clinics !== null) {
+			res.json({names:names});
 
-	}
-	else {
-		res.send("There was a problem at the backend");	
-	}
-	
-});
+		}
+		else {
+			res.send("There was a problem at the backend");	
+		}
+
+	});
 
 });
 
@@ -98,7 +98,7 @@ app.get("/clinics", function(req,res){
 	});
 });
 
-app.get("/clinics/distance", function(req, res) {
+app.get("/clinics/nearest", function(req, res) {
 	
 	console.log(req.query);
 	
@@ -107,19 +107,20 @@ app.get("/clinics/distance", function(req, res) {
 	if (!(lat && lon)) {
 		res.json({message: 'lat lon are needed!'});
 	}
+	else {
+		findNearestClinic(lat, lon, function(distance, clinic){
+			if (distance && clinic) {
+				res.json({distance : distance, clinic:clinic});
+			}
+			else {
+				res.json({
+					success: false,
+					error: 'Something went wrong'
+				})
+			}
 
-	findNearestClinic(lat, lon, function(distance, clinic){
-		if (distance && clinic) {
-			res.json({distance : distance, clinic:clinic});
-		}
-		else {
-			res.json({
-				success: false,
-				error: 'Something went wrong'
-			})
-		}
-
-	});
+		});
+	}
 });
 
 
@@ -129,7 +130,7 @@ app.get("*", function(req,res) {
 });
 
 function findNearestClinic(lat, lon, callback) {
-		FindClinics(function(clinics) {
+	FindClinics(function(clinics) {
 		var nearestClinic;
 		var minDistance = Number.MAX_SAFE_INTEGER;
 
@@ -163,9 +164,9 @@ function calculateDistance(lat1, lon1, lat2, lon2, unit) {
 	dist = dist * 180/Math.PI
 	dist = dist * 60 * 1.1515
 	if (unit=="K") { dist = dist * 1.609344 }
-	if (unit=="N") { dist = dist * 0.8684 }
-	return dist
-}
+		if (unit=="N") { dist = dist * 0.8684 }
+			return dist
+	}
 
 
 // Start server
