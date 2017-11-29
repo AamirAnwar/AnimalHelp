@@ -2,7 +2,7 @@ var express = require("express");
 var app = express();
 var mongoose = require("mongoose");
 var bodyParser = require('body-parser');
-const PORT = 3000;
+const PORT = process.env.PORT|| 3000;
 
 // Set template engine as ejs (doing this lets us omit the .ejs extension)
 app.set('view engine', 'ejs');
