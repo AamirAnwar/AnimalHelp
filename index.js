@@ -38,7 +38,7 @@ var ClinicModel = mongoose.model("clinic", clinicSchema)
 // DB Helpers
 const FindClinics = function(callback) {
 
-	ClinicModel.find({}).exec((function(err, docs) {
+	ClinicModel.find({}).lean().exec((function(err, docs) {
 		if (err) {
 			console.log(err);
 			callback(null);
@@ -90,10 +90,33 @@ app.get("/clinics/all", function(req,res){
 });
 
 app.get("/clinics", function(req,res){
+	var lat = Number(req.query.lat);
+	var lon = Number(req.query.lon);
+	if (!(lat && lon)) {
+		res.json({message: 'lat lon are needed!'});
+		return;
+	}
+
 	FindClinics(function(clinics){
 		if (clinics !== null) {
-			console.log(clinics[0].address);
-			res.render('clinics', {clinics:clinics});
+
+			clinics.forEach(function(clinic) {
+				var cLat = clinic.lat;
+				var cLon = clinic.lon;
+				clinic.distance = calculateDistance(lat, lon, cLat, cLon, 'K');
+				clinic.distance = parseFloat(clinic.distance.toFixed(2));
+			});
+			
+			clinics.sort(function(a,b) {
+				return a.distance - b.distance;
+			});
+
+			if (req.headers.user_client === "ios") {
+				res.json({clinics:clinics});
+			}
+			else {
+				res.render('clinics', {clinics:clinics});
+			}
 		}
 		else {
 			res.send("There was a problem at the backend");	
@@ -103,9 +126,7 @@ app.get("/clinics", function(req,res){
 });
 
 app.get("/clinics/nearest", function(req, res) {
-	
-	console.log(req.query);
-	
+	console.log(req.headers);
 	var lat = Number(req.query.lat);
 	var lon = Number(req.query.lon);
 	if (!(lat && lon)) {
@@ -114,7 +135,8 @@ app.get("/clinics/nearest", function(req, res) {
 	else {
 		findNearestClinic(lat, lon, function(distance, clinic){
 			if (distance && clinic) {
-				res.json({distance : parseFloat(distance.toFixed(2)), clinic:clinic});
+				clinic.distance = parseFloat(distance.toFixed(2));
+				res.json({clinic:clinic});
 			}
 			else {
 				res.json({
@@ -167,10 +189,14 @@ function calculateDistance(lat1, lon1, lat2, lon2, unit) {
 	dist = Math.acos(dist)
 	dist = dist * 180/Math.PI
 	dist = dist * 60 * 1.1515
-	if (unit=="K") { dist = dist * 1.609344 }
-		if (unit=="N") { dist = dist * 0.8684 }
-			return dist
+	if (unit=="K")  { 
+		dist = dist * 1.609344 
 	}
+	if (unit=="N") {
+		dist = dist * 0.8684 
+	}
+	return dist
+}
 
 
 // Start server
