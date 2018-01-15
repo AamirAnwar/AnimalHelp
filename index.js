@@ -114,7 +114,7 @@ app.get("/clinics/nearest", function(req, res) {
 	else {
 		findNearestClinic(lat, lon, function(distance, clinic){
 			if (distance && clinic) {
-				res.json({distance : distance, clinic:clinic});
+				res.json({distance : parseFloat(distance.toFixed(2)), clinic:clinic});
 			}
 			else {
 				res.json({
