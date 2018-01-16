@@ -69,6 +69,37 @@ app.get("/", function(req,res) {
 
 });
 
+app.get("/missing_pets",function(req,res){
+	var cityID = req.query.city_id;
+	if (cityID == null) {
+		res.json({message:"City ID is needed!"});
+	}
+
+
+	var dummyJSON = {
+			type:"Dog",
+			breed:"Husky",
+			age:"2 years",
+			owner_contact:"+919811588962",
+			missing_since:"1st November 2017",
+			reward:"2000 rupees",
+			last_known_location:"Galleria Market, DLF phase 4 ,Gurgaon",
+			description: "Dummy description Dummy description Dummy description Dummy description Dummy description Dummy description",
+			distiguishing_features:"red mark on forehead",
+			image_url:"https://i.pinimg.com/736x/bc/be/e6/bcbee6931f71db0d1629355bd61fe8cd--wolves-mans.jpg"
+		};
+
+		var pets = [];
+		for (var i = 0; i < 10; i++) {
+			pets[i] = dummyJSON;
+		}
+	// TODO find missing pets based on city ID 
+	res.json({
+		pets:pets
+	});
+
+});
+
 
 app.get("/clinics/all", function(req,res){
 	FindClinics(function(clinics){
