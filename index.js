@@ -81,7 +81,7 @@ app.get("/missing_pets",function(req,res){
 			breed:"Husky",
 			age:"2 years",
 			owner_contact:"+919811588962",
-			missing_since:"1st November 2017",
+			missing_since:"4 weeks",
 			reward:"2000 rupees",
 			last_known_location:"Galleria Market, DLF phase 4 ,Gurgaon",
 			description: "Dummy description Dummy description Dummy description Dummy description Dummy description Dummy description",
