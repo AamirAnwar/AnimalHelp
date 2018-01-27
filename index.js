@@ -178,14 +178,16 @@ app.get("/active_cities", function(req, res){
 		cities: [
 		{
 			id:"1",
-			name:"Delhi"
-
+			name:"Delhi",
+			lat:28.70,
+			lon:77.10
 		},
 
 		{
 			id:"2",
-			name:"Mumbai"
-
+			name:"Mumbai",
+			lat:19.07,
+			lon:72.87
 		}
 
 		]
