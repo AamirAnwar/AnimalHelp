@@ -74,32 +74,25 @@ app.get("/missing_pets",function(req,res){
 	if (cityID == null) {
 		res.json({message:"City ID is needed!"});
 	}
-
-
-	var dummyJSON = {
-		type:"Dog",
-		breed:"Husky",
-		age:"2 years",
-		owner_contact:"+919811588962",
-		missing_since:"4 weeks",
-		reward:"2000 rupees",
-		last_known_location:"Galleria Market, DLF phase 4 ,Gurgaon",
-		description: "Dummy description Dummy description Dummy description Dummy description Dummy description Dummy description",
-		distiguishing_features:"red mark on forehead",
-		image_url:"https://i.pinimg.com/736x/bc/be/e6/bcbee6931f71db0d1629355bd61fe8cd--wolves-mans.jpg"
-	};
-
-	var pets = [];
-	for (var i = 0; i < 10; i++) {
-		pets[i] = dummyJSON;
-	}
-	// TODO find missing pets based on city ID 
 	res.json({
-		pets:pets
+		pets:createDummyDataWithCount(8)
 	});
 
 });
 
+app.get("/missing_pets/search", function(req, res) {
+	var cityID = req.query.city_id;
+	if (cityID == null) {
+		res.json({message:"City ID is needed!"});
+	}
+
+	var queryString = req.query.q;
+
+	if (queryString == null) {
+		res.json({message:"Empty query!"});
+	}
+	res.json({pets:createDummyDataWithCount(3)});
+});
 
 app.get("/clinics/all", function(req,res){
 	FindClinics(function(clinics){
@@ -248,6 +241,28 @@ function calculateDistance(lat1, lon1, lat2, lon2, unit) {
 	}
 	return dist
 }
+
+function createDummyDataWithCount(count) {
+	var dummyJSON = {
+		type:"Dog",
+		breed:"Husky",
+		age:"2 years",
+		owner_contact:"+919811588962",
+		missing_since:"4 weeks",
+		reward:"2000 rupees",
+		last_known_location:"Galleria Market, DLF phase 4 ,Gurgaon",
+		description: "Dummy description Dummy description Dummy description Dummy description Dummy description Dummy description",
+		distiguishing_features:"red mark on forehead",
+		image_url:"https://i.pinimg.com/736x/bc/be/e6/bcbee6931f71db0d1629355bd61fe8cd--wolves-mans.jpg"
+	};
+
+	var pets = [];
+	for (var i = 0; i < count; i++) {
+		pets[i] = dummyJSON;
+	}
+	return pets;
+}
+
 
 
 // Start server
