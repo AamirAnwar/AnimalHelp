@@ -15,7 +15,7 @@ app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Setup DB
-// mongoose.connect('mongodb://localhost/clinics');
+// const mongoConnectURL = 'mongodb://localhost/clinics';
 const mongoConnectURL = 'mongodb://'+ process.env.DB_USER + ':' + process.env.DB_PASS +'@ds123926.mlab.com:23926/animal_help';
 mongoose.connect(mongoConnectURL)
 
@@ -77,22 +77,22 @@ app.get("/missing_pets",function(req,res){
 
 
 	var dummyJSON = {
-			type:"Dog",
-			breed:"Husky",
-			age:"2 years",
-			owner_contact:"+919811588962",
-			missing_since:"4 weeks",
-			reward:"2000 rupees",
-			last_known_location:"Galleria Market, DLF phase 4 ,Gurgaon",
-			description: "Dummy description Dummy description Dummy description Dummy description Dummy description Dummy description",
-			distiguishing_features:"red mark on forehead",
-			image_url:"https://i.pinimg.com/736x/bc/be/e6/bcbee6931f71db0d1629355bd61fe8cd--wolves-mans.jpg"
-		};
+		type:"Dog",
+		breed:"Husky",
+		age:"2 years",
+		owner_contact:"+919811588962",
+		missing_since:"4 weeks",
+		reward:"2000 rupees",
+		last_known_location:"Galleria Market, DLF phase 4 ,Gurgaon",
+		description: "Dummy description Dummy description Dummy description Dummy description Dummy description Dummy description",
+		distiguishing_features:"red mark on forehead",
+		image_url:"https://i.pinimg.com/736x/bc/be/e6/bcbee6931f71db0d1629355bd61fe8cd--wolves-mans.jpg"
+	};
 
-		var pets = [];
-		for (var i = 0; i < 10; i++) {
-			pets[i] = dummyJSON;
-		}
+	var pets = [];
+	for (var i = 0; i < 10; i++) {
+		pets[i] = dummyJSON;
+	}
 	// TODO find missing pets based on city ID 
 	res.json({
 		pets:pets
@@ -178,6 +178,26 @@ app.get("/clinics/nearest", function(req, res) {
 
 		});
 	}
+});
+
+app.get("/active_cities", function(req, res){
+	res.json({
+		cities: [
+		{
+			id:"1",
+			name:"Delhi"
+
+		},
+
+		{
+			id:"2",
+			name:"Mumbai"
+
+		}
+
+		]
+
+	});
 });
 
 
