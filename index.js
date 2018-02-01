@@ -75,7 +75,7 @@ app.get("/missing_pets",function(req,res){
 		res.json({message:"City ID is needed!"});
 	}
 	res.json({
-		pets:createDummyDataWithCount(8)
+		pets:[]
 	});
 
 });
@@ -91,7 +91,7 @@ app.get("/missing_pets/search", function(req, res) {
 	if (queryString == null) {
 		res.json({message:"Empty query!"});
 	}
-	res.json({pets:createDummyDataWithCount(3)});
+	res.json({pets:[]});
 });
 
 app.get("/clinics/all", function(req,res){
@@ -136,7 +136,14 @@ app.get("/clinics", function(req,res){
 			});
 
 			if (req.headers.user_client === "ios") {
-				res.json({clinics:clinics});
+				if (clinics.length > 0) {
+					if (clinics[0].distance < 150) {
+						res.json({clinics:clinics});
+						return;
+					}
+				}
+				res.json({clinics:[]})
+				
 			}
 			else {
 				res.render('clinics', {clinics:clinics});
@@ -181,18 +188,11 @@ app.get("/active_cities", function(req, res){
 			name:"Delhi",
 			lat:28.70,
 			lon:77.10
-		},
+		}]});
+});
 
-		{
-			id:"2",
-			name:"Mumbai",
-			lat:19.07,
-			lon:72.87
-		}
-
-		]
-
-	});
+app.get("/about",function(req,res){
+	res.render('about');
 });
 
 
