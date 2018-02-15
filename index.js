@@ -5,6 +5,10 @@ var mongoose = require("mongoose");
 var bodyParser = require('body-parser');
 const PORT = process.env.PORT|| 3000;
 
+const delhi_lat = 28.7041;
+const delhi_lon = 77.1025;
+const delhi_city_id = 1
+
 // Set template engine as ejs (doing this lets us omit the .ejs extension)
 app.set('view engine', 'ejs');
 
@@ -15,30 +19,58 @@ app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Setup DB
-// const mongoConnectURL = 'mongodb://localhost/clinics';
-const mongoConnectURL = 'mongodb://'+ process.env.DB_USER + ':' + process.env.DB_PASS +'@ds123926.mlab.com:23926/animal_help';
+// const mongoConnectURL = 'mongodb://localhost/watchdog_v1';
+const mongoConnectURL = 'mongodb://'+ process.env.DB_USER + ':' + process.env.DB_PASS +'@ds237858.mlab.com:37858/watchdog_v1';
 mongoose.connect(mongoConnectURL)
 
-var Schema = mongoose.Schema, objectId = Schema.ObjectId;
+var Schema = mongoose.Schema;
+var objectId = Schema.ObjectId;
 
-var clinicSchema = new Schema({
-	author:objectId,
-	name: String,
-	address:String,
-	city:String,
+// Schemas
+var citySchema = new Schema({
+	city_id:Number,
+	name:String,
+	country_code:String,
 	lat:Number,
-	lon:Number,
-	date: {type: Date, default: Date.now}
-
+	lon:Number
 });
 
-// Clinic model
-var ClinicModel = mongoose.model("clinic", clinicSchema)
+var missingPetSchema = new Schema({
+	name:String,
+	type:String,
+	breed:String,
+	desc:String,
+	colour:String,
+	age:String,
+	owner_contact:String,
+	missing_since:String,
+	last_known_location:String,
+	date_posted: {type:Date, default:Date.now},
+	distiguishing_feature: String,
+	reward:String,
+	lat:Number,
+	lon:Number,
+	city:citySchema
+});
+
+var clinicSchema = new Schema({
+	name: String,
+	address:String,
+	phone:String,
+	lat:Number,
+	lon:Number,
+	city:citySchema,
+	date: {type: Date, default: Date.now}
+});
+
+// Models
+var Clinic = mongoose.model("clinic", clinicSchema);
+var City = mongoose.model("Citie", citySchema);
+var MissingPet = mongoose.model("MissingPet",missingPetSchema);
 
 // DB Helpers
-const FindClinics = function(callback) {
-
-	ClinicModel.find({}).lean().exec((function(err, docs) {
+const FindClinics = function(city_id,callback) {
+	Clinic.find({"city.city_id":city_id}).lean().exec((function(err, docs) {
 		if (err) {
 			console.log(err);
 			callback(null);
@@ -49,7 +81,25 @@ const FindClinics = function(callback) {
 			callback(docs);
 		}
 	}));
+}
 
+const GetCity = function(city_id, callback) {
+	City.findOne({city_id:city_id}, function(err, city) {
+		callback(err,city);
+	});
+}
+
+const FindMissingPets = function(city_id, callback) {
+	MissingPet.find({}, function(err, missing_pets){
+		if (err) {
+			console.log(err);
+			callback([]);
+		}
+		else {
+			callback(missing_pets);
+		}
+		
+	});
 }
 
 // Routes
@@ -59,7 +109,6 @@ app.get("/", function(req,res) {
 	if (lat && lon) {
 		findNearestClinic(lat, lon, function(distance, clinic) {
 			res.render('home', {distance:distance, clinic:clinic});
-
 		});
 	}
 	else {
@@ -69,18 +118,7 @@ app.get("/", function(req,res) {
 
 });
 
-app.get("/missing_pets",function(req,res){
-	var cityID = req.query.city_id;
-	if (cityID == null) {
-		res.json({message:"City ID is needed!"});
-	}
-	res.json({
-		pets:[]
-	});
-
-});
-
-app.get("/missing_pets/search", function(req, res) {
+app.get("/missingpets/search", function(req, res) {
 	var cityID = req.query.city_id;
 	if (cityID == null) {
 		res.json({message:"City ID is needed!"});
@@ -94,24 +132,6 @@ app.get("/missing_pets/search", function(req, res) {
 	res.json({pets:[]});
 });
 
-app.get("/clinics/all", function(req,res){
-	FindClinics(function(clinics){
-		var names = [];
-		clinics.forEach(function(clinic) {
-			names.push(clinic.name);
-		})
-
-		if (clinics !== null) {
-			res.json({names:names});
-
-		}
-		else {
-			res.send("There was a problem at the backend");	
-		}
-
-	});
-
-});
 
 app.get("/clinics", function(req,res){
 	var lat = Number(req.query.lat);
@@ -120,8 +140,13 @@ app.get("/clinics", function(req,res){
 		res.json({message: 'lat lon are needed!'});
 		return;
 	}
+	// Only available in Delhi for now. Check against it's lat and lon
+	if (isNearDelhi(lat, lon) == false) {
+		callback();
+		return
+	}
 
-	FindClinics(function(clinics){
+	FindClinics(delhi_city_id,function(clinics){
 		if (clinics !== null) {
 
 			clinics.forEach(function(clinic) {
@@ -135,7 +160,7 @@ app.get("/clinics", function(req,res){
 				return a.distance - b.distance;
 			});
 
-			if (req.headers.user_client === "ios") {
+			if (isAppleRequest(req)) {
 				if (clinics.length > 0) {
 					if (clinics[0].distance < 150) {
 						res.json({clinics:clinics});
@@ -181,18 +206,45 @@ app.get("/clinics/nearest", function(req, res) {
 });
 
 app.get("/active_cities", function(req, res){
-	res.json({
-		cities: [
-		{
-			id:"1",
-			name:"Delhi",
-			lat:28.70,
-			lon:77.10
-		}]});
+	City.find({}, function(err, cities){
+		if (err) {
+			res.json({err:err});
+		}
+		else {
+			res.json({cities:cities});
+		}
+
+	});
 });
 
 app.get("/about",function(req,res){
 	res.render('about');
+});
+
+app.get("/missingpets",function(req,res){
+	console.log("Show missing pets");
+	if (isAppleRequest(req)) {
+		FindMissingPets(delhi_city_id, function(pets) {
+			console.log(pets);
+			res.json({pets:pets});
+		});
+	}
+	else {
+		res.render('add_missing_pet');
+	}
+});
+
+app.post("/missingpets", function(req, res){
+	var pet = new MissingPet(req.body);
+	pet.desc = pet.desc.trim();
+	pet.save(function(err, missing_pet) {
+		if (err) {
+			res.json({status:"failed",err:err});
+		}
+		else {
+			res.json({status:"success",pet:pet});
+		}
+	});
 });
 
 
@@ -202,11 +254,16 @@ app.get("*", function(req,res) {
 });
 
 function findNearestClinic(lat, lon, callback) {
-	FindClinics(function(clinics) {
+	if (isNearDelhi(lat, lon) == false) {
+		callback();
+		return;
+	}
+
+	FindClinics(delhi_city_id,function(clinics) {
 		var nearestClinic;
 		var minDistance = Number.MAX_SAFE_INTEGER;
 
-		clinics.forEach(function(clinic){
+		clinics.forEach(function(clinic) {
 			var cLat = clinic.lat;
 			var cLon = clinic.lon;
 			var distance = calculateDistance(lat, lon, cLat, cLon, 'K')
@@ -215,6 +272,7 @@ function findNearestClinic(lat, lon, callback) {
 				nearestClinic = clinic;
 			}
 		});
+
 		if (minDistance && nearestClinic) {
 			callback(minDistance, nearestClinic);
 		}
@@ -222,9 +280,15 @@ function findNearestClinic(lat, lon, callback) {
 			callback();
 		}
 	});
-
 }
 
+
+function isNearDelhi(lat,lon) {
+	// Only available in Delhi for now. Check against it's lat and lon
+	var distance = calculateDistance(lat, lon, delhi_lat, delhi_lon, 'K');
+	console.log(distance);	
+	return (distance < 200);
+}
 
 function calculateDistance(lat1, lon1, lat2, lon2, unit) {
 	var radlat1 = Math.PI * lat1/180
@@ -244,28 +308,9 @@ function calculateDistance(lat1, lon1, lat2, lon2, unit) {
 	return dist
 }
 
-function createDummyDataWithCount(count) {
-	var dummyJSON = {
-		type:"Dog",
-		breed:"Husky",
-		age:"2 years",
-		owner_contact:"+919811588962",
-		missing_since:"4 weeks",
-		reward:"2000 rupees",
-		last_known_location:"Galleria Market, DLF phase 4 ,Gurgaon",
-		description: "Dummy description Dummy description Dummy description Dummy description Dummy description Dummy description",
-		distiguishing_features:"red mark on forehead",
-		image_url:"https://i.pinimg.com/736x/bc/be/e6/bcbee6931f71db0d1629355bd61fe8cd--wolves-mans.jpg"
-	};
-
-	var pets = [];
-	for (var i = 0; i < count; i++) {
-		pets[i] = dummyJSON;
-	}
-	return pets;
+function isAppleRequest(req) {
+	return req.headers.user_client === "ios"
 }
-
-
 
 // Start server
 app.listen(PORT, function() {
