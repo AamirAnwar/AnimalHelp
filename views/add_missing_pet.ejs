@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<% include head.ejs %>
+	<link rel="stylesheet" type="text/css" href="/style.css">
+</head>
+<body class='container'>
+	<header><%include header.ejs%></header>
+	<h1>Add a missing pet</h1>
+	<form target="/missingpets" method="POST">
+		<div class="form-group">
+			<label for="name">Name</label>
+			<input type="text" class="form-control" id="name" name="name" placeholder="Pet name">
+		</div>
+		<div class="form-group">
+			<label for="type">Type</label>
+			<input type="text" class="form-control" id="type" name="type" placeholder="Dog,Cat,Hamster">
+		</div>
+
+		<div class="form-group">
+			<label for="breed">Breed</label>
+			<input type="text" class="form-control" id="breed" name="breed" placeholder="What breed is your pet?">
+		</div>
+
+		<div class="form-group">
+			<label for="colour">Colour</label>
+			<input type="text" class="form-control" id="colour" name="colour" placeholder="Brown, Black with white marks">
+		</div>
+
+		<div class="form-group">
+			<label for="age">Age</label>
+			<input type="text" class="form-control" id="age" name="age" placeholder="2 years and 3 months">
+		</div>
+
+		<div class="form-group">
+			<label for="owner_contact">Owner Contact</label>
+			<input type="text" class="form-control" id="owner_contact" name="owner_contact" placeholder="9121566298">
+		</div>
+
+		<div class="form-group">
+			<label for="missing_since">Missing Since</label>
+			<input type="text" class="form-control" id="missing_since" name="missing_since" placeholder="3 days">
+		</div>
+
+		<div class="form-group">
+			<label for="last_known_location">Last Known Location</label>
+			<input type="text" class="form-control" id="last_known_location" name="last_known_location" placeholder="Andheri East">
+		</div>
+
+		<div class="form-group">
+			<label for="distiguishing_feature">Distinguishing marks</label>
+			<input type="text" class="form-control" id="distiguishing_feature" name="distiguishing_feature" placeholder="Black dot on forehead">
+		</div>
+
+		<div class="form-group">
+			<label for="reward">Reward</label>
+			<input type="text" class="form-control" id="reward" name="reward" placeholder="20000 rupees">
+		</div>
+
+
+		<div class="form-group">
+			<label for="desc">Description</label>
+			 <textarea class="form-control" id="desc" name="desc" rows="3"></textarea>
+		</div>
+
+		<button type="submit" class="btn btn-primary">Submit</button>
+	</form>
+</body>
+</html>

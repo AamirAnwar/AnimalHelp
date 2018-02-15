@@ -19,8 +19,8 @@ app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Setup DB
-const mongoConnectURL = 'mongodb://localhost/watchdog_v1';
-// const mongoConnectURL = 'mongodb://'+ process.env.DB_USER + ':' + process.env.DB_PASS +'@ds123926.mlab.com:23926/animal_help';
+// const mongoConnectURL = 'mongodb://localhost/watchdog_v1';
+const mongoConnectURL = 'mongodb://'+ process.env.DB_USER + ':' + process.env.DB_PASS +'@ds237858.mlab.com:37858/watchdog_v1';
 mongoose.connect(mongoConnectURL)
 
 var Schema = mongoose.Schema;
@@ -47,7 +47,7 @@ var missingPetSchema = new Schema({
 	last_known_location:String,
 	date_posted: {type:Date, default:Date.now},
 	distiguishing_feature: String,
-	reward:Number,
+	reward:String,
 	lat:Number,
 	lon:Number,
 	city:citySchema
@@ -89,6 +89,19 @@ const GetCity = function(city_id, callback) {
 	});
 }
 
+const FindMissingPets = function(city_id, callback) {
+	MissingPet.find({}, function(err, missing_pets){
+		if (err) {
+			console.log(err);
+			callback([]);
+		}
+		else {
+			callback(missing_pets);
+		}
+		
+	});
+}
+
 // Routes
 app.get("/", function(req,res) {
 	var lat = Number(req.query.lat);
@@ -105,18 +118,7 @@ app.get("/", function(req,res) {
 
 });
 
-app.get("/missing_pets",function(req,res){
-	var cityID = req.query.city_id;
-	if (cityID == null) {
-		res.json({message:"City ID is needed!"});
-	}
-	res.json({
-		pets:[]
-	});
-
-});
-
-app.get("/missing_pets/search", function(req, res) {
+app.get("/missingpets/search", function(req, res) {
 	var cityID = req.query.city_id;
 	if (cityID == null) {
 		res.json({message:"City ID is needed!"});
@@ -158,7 +160,7 @@ app.get("/clinics", function(req,res){
 				return a.distance - b.distance;
 			});
 
-			if (req.headers.user_client === "ios") {
+			if (isAppleRequest(req)) {
 				if (clinics.length > 0) {
 					if (clinics[0].distance < 150) {
 						res.json({clinics:clinics});
@@ -217,6 +219,32 @@ app.get("/active_cities", function(req, res){
 
 app.get("/about",function(req,res){
 	res.render('about');
+});
+
+app.get("/missingpets",function(req,res){
+	console.log("Show missing pets");
+	if (isAppleRequest(req)) {
+		FindMissingPets(delhi_city_id, function(pets) {
+			console.log(pets);
+			res.json({pets:pets});
+		});
+	}
+	else {
+		res.render('add_missing_pet');
+	}
+});
+
+app.post("/missingpets", function(req, res){
+	var pet = new MissingPet(req.body);
+	pet.desc = pet.desc.trim();
+	pet.save(function(err, missing_pet) {
+		if (err) {
+			res.json({status:"failed",err:err});
+		}
+		else {
+			res.json({status:"success",pet:pet});
+		}
+	});
 });
 
 
@@ -278,6 +306,10 @@ function calculateDistance(lat1, lon1, lat2, lon2, unit) {
 		dist = dist * 0.8684 
 	}
 	return dist
+}
+
+function isAppleRequest(req) {
+	return req.headers.user_client === "ios"
 }
 
 // Start server
