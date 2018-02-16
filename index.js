@@ -4,6 +4,7 @@ var app = express();
 var mongoose = require("mongoose");
 var bodyParser = require('body-parser');
 const PORT = process.env.PORT|| 3000;
+var path = require('path');
 
 const delhi_lat = 28.7041;
 const delhi_lon = 77.1025;
@@ -219,6 +220,11 @@ app.get("/active_cities", function(req, res){
 
 app.get("/about",function(req,res){
 	res.render('about');
+});
+
+app.get("/privacy_policy", function(req, res){
+	res.sendfile(path.join(__dirname + '/public/markup/privacy_policy.html'))
+
 });
 
 app.get("/missingpets",function(req,res){
